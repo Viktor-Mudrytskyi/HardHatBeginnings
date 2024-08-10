@@ -4,8 +4,9 @@ import "hardhat-gas-reporter";
 import "@nomiclabs/hardhat-etherscan";
 import * as dotenv from "dotenv";
 import "solidity-coverage";
+import "solhint";
 
-import "./tasks/block_number";
+import "./tasks/block-number";
 
 dotenv.config();
 
