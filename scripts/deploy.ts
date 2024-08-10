@@ -33,7 +33,7 @@ async function verify(contractAddress: string, args?: string[]): Promise<void> {
             address: contractAddress,
             constructorArguments: args,
         });
-        console.log(result);
+        // console.log(result);
     } catch (e) {
         console.log(e);
     }

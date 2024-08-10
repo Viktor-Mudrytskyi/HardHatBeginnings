@@ -1,22 +1,18 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-ethers";
-import "@nomicfoundation/hardhat-toolbox";
-import dotenv from "dotenv";
+import "hardhat-gas-reporter";
+import "@nomiclabs/hardhat-etherscan";
+import * as dotenv from "dotenv";
+import "solidity-coverage";
+
 import "./tasks/block_number";
 
 dotenv.config();
 
-if (!process.env.ETHERSCAN_API_KEY) {
-    throw new Error("Please set ETHERSCAN_API_KEY in a .env file");
-}
-
-if (!process.env.ETH_SEPOLIA_RPC_URL) {
-    throw new Error("Please set ETH_SEPOLIA_RPC_URL in a .env file");
-}
-
-if (!process.env.PRIVATE_KEY) {
-    throw new Error("Please set ETH_SEPOLIA_RPC_URL in a .env file");
-}
+const privateKey = process.env.PRIVATE_KEY || "";
+const ethSepoliaRpc = process.env.ETH_SEPOLIA_RPC_URL;
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY;
+const coinmarketCapApiKey = process.env.COIMARKETCAP_API_KEY;
 
 const config: HardhatUserConfig = {
     solidity: "0.8.24",
@@ -24,8 +20,8 @@ const config: HardhatUserConfig = {
     networks: {
         // object naame corresponds to network parameter
         eth_sepolia: {
-            url: process.env.ETH_SEPOLIA_RPC_URL,
-            accounts: [process.env.PRIVATE_KEY],
+            url: ethSepoliaRpc,
+            accounts: [privateKey],
             chainId: 11155111,
         },
         localhost: {
@@ -35,7 +31,15 @@ const config: HardhatUserConfig = {
         },
     },
     etherscan: {
-        apiKey: process.env.ETHERSCAN_API_KEY,
+        apiKey: etherscanApiKey,
+    },
+    gasReporter: {
+        // enabled: true,
+        enabled: false,
+        currency: "USD",
+        coinmarketcap: coinmarketCapApiKey,
+        gasPriceApi:
+            "https://api-sepolia.etherscan.io/api?module=proxy&action=eth_gasPrice", // ETH Sepolia gas price
     },
 };
 
