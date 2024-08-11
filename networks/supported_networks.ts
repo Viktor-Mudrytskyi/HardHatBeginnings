@@ -14,6 +14,7 @@ if (!ethSepoliaRpc || !polygonCardonaRpc) {
 
 export const ethSepoliaNetwork: NetworkInterface = {
     name: "Ethereum Sepolia",
+    deployName: "eth-sepolia",
     rpcUrl: ethSepoliaRpc,
     chainId: 11155111,
     token: "ETH",
@@ -23,6 +24,7 @@ export const ethSepoliaNetwork: NetworkInterface = {
 
 export const polygonCardonaNetwork: NetworkInterface = {
     name: "Polygon Cardona",
+    deployName: "polygon-cardona",
     rpcUrl: polygonCardonaRpc,
     chainId: 2442,
     token: "MATIC",

@@ -13,3 +13,8 @@ yarn hardhat node
 
 yarn hardhat test
 yarn hardhat test --grep store // grep grabs tests which contain provided string
+
+# Hardhat deploy
+
+yarn hardhat deploy
+yarn hardhat deploy --tags [tag-name]

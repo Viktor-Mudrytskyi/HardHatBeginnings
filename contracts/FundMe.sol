@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import {PriceConverter} from "contracts/PriceConverter.sol";
 import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
+error NotOwner();
+
 contract FundMe {
     using PriceConverter for uint256;
 
@@ -18,13 +20,13 @@ contract FundMe {
         funders.push(msg.sender);
         addressToAmountFunded[msg.sender] = msg.value;
     }
-
-    address public owner;
+    // consts and immutables are cheaper to read
+    address public immutable i_owner;
 
     AggregatorV3Interface public priceFeed;
 
     constructor(address _priceFeedAddress) {
-        owner = msg.sender;
+        i_owner = msg.sender;
         priceFeed = AggregatorV3Interface(_priceFeedAddress);
     }
 
@@ -54,8 +56,20 @@ contract FundMe {
         require(callSuccess);
     }
 
+    receive() external payable {
+        fund();
+    }
+
+    fallback() external payable {
+        fund();
+    }
+
     modifier onlyOwner() {
-        require(msg.sender == owner, "Only owner can call withdraw");
+        // require(msg.sender == i_owner, "Only owner can call withdraw");
+        // or
+        if (msg.sender != i_owner) {
+            revert NotOwner();
+        }
         _;
     }
 }

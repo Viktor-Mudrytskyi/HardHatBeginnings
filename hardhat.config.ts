@@ -39,12 +39,12 @@ const config: HardhatUserConfig = {
     defaultNetwork: "hardhat",
     networks: {
         // object naame corresponds to network parameter
-        [ethSepolia.name]: {
+        [ethSepolia.deployName]: {
             url: ethSepolia.rpcUrl,
             accounts: [privateKey],
             chainId: ethSepolia.chainId,
         },
-        [polygonCardona.name]: {
+        [polygonCardona.deployName]: {
             url: polygonCardona.rpcUrl,
             accounts: [privateKey],
             chainId: polygonCardona.chainId,
