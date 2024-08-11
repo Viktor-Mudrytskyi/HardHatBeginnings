@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 import {PriceConverter} from "contracts/PriceConverter.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.sol";
 
 contract FundMe {
     using PriceConverter for uint256;
@@ -10,7 +11,7 @@ contract FundMe {
 
     function fund() public payable {
         require(
-            msg.value.convertEth() >= minUsd,
+            msg.value.convertEth(priceFeed) >= minUsd,
             "Value should be greater than 0.015 eth(50$)"
         );
 
@@ -20,8 +21,11 @@ contract FundMe {
 
     address public owner;
 
-    constructor() {
+    AggregatorV3Interface public priceFeed;
+
+    constructor(address _priceFeedAddress) {
         owner = msg.sender;
+        priceFeed = AggregatorV3Interface(_priceFeedAddress);
     }
 
     address[] public funders;
