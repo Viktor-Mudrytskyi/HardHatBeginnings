@@ -1,4 +1,6 @@
 {
-    "extends": "solhint:recommended"
-
+    "extends": "solhint:recommended",
+    "rules": {
+        "var-name-mixedcase": "off"
+    }
 }

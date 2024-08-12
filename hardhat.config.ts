@@ -63,8 +63,7 @@ const config: HardhatUserConfig = {
         apiKey: etherscanApiKey,
     },
     gasReporter: {
-        // enabled: true,
-        enabled: false,
+        enabled: true,
         currency: "USD",
         coinmarketcap: coinmarketCapApiKey,
         gasPriceApi: ethSepoliaGasPriceApi, // ETH Sepolia gas price

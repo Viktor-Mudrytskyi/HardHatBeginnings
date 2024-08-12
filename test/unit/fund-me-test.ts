@@ -4,6 +4,7 @@ import { log } from "console";
 import "chai";
 import "@nomicfoundation/hardhat-chai-matchers";
 import { assert, expect } from "chai";
+import { ContractTransactionReceipt } from "ethers";
 
 describe("FundMe", () => {
     let fundMe: FundMe;
@@ -28,7 +29,7 @@ describe("FundMe", () => {
 
     describe("constructor", () => {
         it("sets the Aggregator address correctly", async () => {
-            const reponse: string = await fundMe.priceFeed();
+            const reponse: string = await fundMe.getPriceFeed();
 
             const expectedFeed = await mockV3Aggregator.getAddress();
             assert.equal(reponse, expectedFeed);
@@ -44,18 +45,18 @@ describe("FundMe", () => {
 
         it("Updates the amount funded data structure", async () => {
             await fundMe.fund({ value: sendVal });
-            const reponse = await fundMe.addressToAmountFunded(deployer);
+            const reponse = await fundMe.getAddressToAmountFunded(deployer);
             assert.equal(reponse.toString(), sendVal.toString());
         });
 
         it("Adds funder to array of funders", async () => {
             await fundMe.fund({ value: sendVal });
-            const funder = await fundMe.funders(0);
+            const funder = await fundMe.getFunder(0);
             assert.equal(funder, deployer);
         });
     });
 
-    describe("withdraw", () => {
+    describe("cheaperWithdraw", () => {
         beforeEach(async () => {
             await fundMe.fund({ value: sendVal });
         });
@@ -68,8 +69,16 @@ describe("FundMe", () => {
             const startingDeployerBalance =
                 await ethers.provider.getBalance(deployer);
             // Act
-            const trxResponse = await fundMe.withdraw();
-            const trxReceipt = await trxResponse.wait(1);
+            const trxResponse = await fundMe.cheaperWithdraw();
+            const trxReceipt: ContractTransactionReceipt | null =
+                await trxResponse.wait(1);
+            if (trxReceipt === null) {
+                throw new Error("trxReceipt is null");
+            }
+            const { gasUsed, gasPrice } = trxReceipt;
+            const fee = trxReceipt?.fee;
+            // OR
+            // const computedFee = gasUsed * gasPrice;
 
             const endingFundMeBalance =
                 await ethers.provider.getBalance(fundMeAddress);
@@ -80,8 +89,63 @@ describe("FundMe", () => {
             assert.equal(endingFundMeBalance, 0n);
             assert.equal(
                 startingFundMeBalance + startingDeployerBalance,
-                endingDeployerBalance + gasPrice,
+                endingDeployerBalance + fee,
             );
+        });
+
+        it("allows us to withdraw with multiple funders", async () => {
+            // Arrange
+            const accounts = await ethers.getSigners();
+            for (let i = 1; i < 6; i++) {
+                const fundMeConnectedContract = await fundMe.connect(
+                    accounts[i],
+                );
+                await fundMeConnectedContract.fund({ value: sendVal });
+            }
+            const fundMeAddress = await fundMe.getAddress();
+            const startingFundMeBalance =
+                await ethers.provider.getBalance(fundMeAddress);
+            const startingDeployerBalance =
+                await ethers.provider.getBalance(deployer);
+
+            const trxResponse = await fundMe.cheaperWithdraw();
+            const trxReceipt: ContractTransactionReceipt | null =
+                await trxResponse.wait(1);
+            if (trxReceipt === null) {
+                throw new Error("trxReceipt is null");
+            }
+            const { gasUsed, gasPrice } = trxReceipt;
+            const fee = trxReceipt?.fee;
+
+            const endingFundMeBalance =
+                await ethers.provider.getBalance(fundMeAddress);
+
+            const endingDeployerBalance =
+                await ethers.provider.getBalance(deployer);
+            // Asserts
+            assert.equal(endingFundMeBalance, 0n);
+            assert.equal(
+                startingFundMeBalance + startingDeployerBalance,
+                endingDeployerBalance + fee,
+            );
+
+            await expect(fundMe.getFunder(0)).to.be.reverted;
+
+            for (let i = 1; i < 6; i++) {
+                assert.equal(
+                    await fundMe.getAddressToAmountFunded(accounts[i].address),
+                    0n,
+                );
+            }
+        });
+
+        it("only allows the owner to withdraw", async () => {
+            const accounts = await ethers.getSigners();
+            const attacker = accounts[1];
+            const attackerConnectedContract = await fundMe.connect(attacker);
+            await expect(
+                attackerConnectedContract.withdraw(),
+            ).to.be.revertedWithCustomError(fundMe, "FundMe__NotOwner");
         });
     });
 });
