@@ -6,6 +6,9 @@ import * as dotenv from "dotenv";
 import "solidity-coverage";
 import "solhint";
 import "hardhat-deploy";
+import "@typechain/hardhat";
+import "chai";
+import "@nomicfoundation/hardhat-chai-matchers";
 
 import "./tasks/block-number";
 import { NetworkInterface } from "./networks/network_interface";
@@ -37,6 +40,7 @@ const config: HardhatUserConfig = {
         ],
     },
     defaultNetwork: "hardhat",
+
     networks: {
         // object naame corresponds to network parameter
         [ethSepolia.deployName]: {

@@ -1,6 +1,6 @@
 import { ethers, run, network } from "hardhat";
-import { SimpleStorage } from "../typechain-types";
 import { expect, assert } from "chai";
+import { SimpleStorage } from "../../typechain-types";
 
 // The same as test() in Flutter Tests
 describe("Simple storage", () => {

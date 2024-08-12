@@ -45,4 +45,4 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
     log("-----------------------------------");
 };
 
-module.exports.tags = ["all", "fundme"];
+module.exports.tags = ["all", "fund-me"];
